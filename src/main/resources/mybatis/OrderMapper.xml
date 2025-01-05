@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.example.baken.mapper.OrderMapper">
+
+    <resultMap id="OrderWithProductAndAddressResultMap" type="org.example.baken.entity.Order">
+        <id property="id" column="order_id" />
+        <result property="userId" column="user_id" />
+        <result property="productId" column="product_id" />
+        <result property="quantity" column="quantity" />
+        <result property="totalPrice" column="total_price" />
+        <result property="status" column="status" />
+        <result property="addressId" column="address_id" />
+        <result property="createTime" column="order_create_time" />
+        <result property="updateTime" column="order_update_time" />
+
+        <!-- 关联的 Product 对象 -->
+        <association property="product" javaType="org.example.baken.entity.Product">
+            <id property="id" column="product_id" />
+            <result property="name" column="product_name" />
+            <result property="description" column="product_description" />
+            <result property="price" column="product_price" />
+            <result property="stock" column="product_stock" />
+            <result property="createTime" column="product_create_time" />
+            <result property="updateTime" column="product_update_time" />
+        </association>
+
+        <!-- 关联的 UserAddress 对象 -->
+        <association property="userAddress" javaType="org.example.baken.entity.UserAddress">
+            <id property="id" column="address_id" />
+            <result property="userId" column="address_user_id" />
+            <result property="receiverName" column="receiver_name" />
+            <result property="receiverPhone" column="receiver_phone" />
+            <result property="receiverRegion" column="receiver_region" />
+            <result property="receiverAddress" column="receiver_address" />
+            <result property="isDefault" column="is_default" />
+            <result property="createTime" column="address_create_time" />
+            <result property="updateTime" column="address_update_time" />
+        </association>
+    </resultMap>
+
+    <select id="selectOrderById" resultMap="OrderWithProductAndAddressResultMap">
+        SELECT
+            o.id AS order_id,
+            o.user_id,
+            o.product_id,
+            o.quantity,
+            o.total_price,
+            o.status,
+            o.address_id,
+            o.create_time AS order_create_time,
+            o.update_time AS order_update_time,
+            p.id AS product_id,
+            p.name AS product_name,
+            p.description AS product_description,
+            p.price AS product_price,
+            p.stock AS product_stock,
+            p.create_time AS product_create_time,
+            p.update_time AS product_update_time,
+            ua.id AS address_id,
+            ua.user_id AS address_user_id,
+            ua.receiver_name,
+            ua.receiver_phone,
+            ua.receiver_region,
+            ua.receiver_address,
+            ua.is_default,
+            ua.create_time AS address_create_time,
+            ua.update_time AS address_update_time
+        FROM
+            `order` o
+                LEFT JOIN
+            product p ON o.product_id = p.id
+                LEFT JOIN
+            user_address ua ON o.address_id = ua.id
+        WHERE
+            o.id = #{id}
+    </select>
+
+    <!-- 根据用户ID查询订单列表及其关联的商品信息 -->
+    <select id="selectOrdersByUserId" resultMap="OrderWithProductAndAddressResultMap">
+        SELECT
+            o.id AS order_id,
+            o.user_id,
+            o.product_id,
+            o.quantity,
+            o.total_price,
+            o.status,
+            o.address_id,
+            o.create_time AS order_create_time,
+            o.update_time AS order_update_time,
+            p.id AS product_id,
+            p.name AS product_name,
+            p.description AS product_description,
+            p.price AS product_price,
+            p.stock AS product_stock,
+            p.create_time AS product_create_time,
+            p.update_time AS product_update_time,
+            ua.id AS address_id,
+            ua.user_id AS address_user_id,
+            ua.receiver_name,
+            ua.receiver_phone,
+            ua.receiver_region,
+            ua.receiver_address,
+            ua.is_default,
+            ua.create_time AS address_create_time,
+            ua.update_time AS address_update_time
+        FROM
+            `order` o
+                LEFT JOIN
+            product p ON o.product_id = p.id
+                LEFT JOIN
+            user_address ua ON o.address_id = ua.id
+        WHERE
+            o.user_id = #{userId}
+    </select>
+
+    <!-- 分页查询订单列表及其关联的商品信息 -->
+    <select id="selectOrdersByPage" resultMap="OrderWithProductAndAddressResultMap">
+        SELECT
+            o.id AS order_id,
+            o.user_id,
+            o.product_id,
+            o.quantity,
+            o.total_price,
+            o.status,
+            o.address_id,
+            o.create_time AS order_create_time,
+            o.update_time AS order_update_time,
+            p.id AS product_id,
+            p.name AS product_name,
+            p.description AS product_description,
+            p.price AS product_price,
+            p.stock AS product_stock,
+            p.create_time AS product_create_time,
+            p.update_time AS product_update_time,
+            ua.id AS address_id,
+            ua.user_id AS address_user_id,
+            ua.receiver_name,
+            ua.receiver_phone,
+            ua.receiver_region,
+            ua.receiver_address,
+            ua.is_default,
+            ua.create_time AS address_create_time,
+            ua.update_time AS address_update_time
+        FROM
+            `order` o
+                LEFT JOIN
+            product p ON o.product_id = p.id
+                LEFT JOIN
+            user_address ua ON o.address_id = ua.id
+            LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 查询订单总数 -->
+    <select id="countOrders" resultType="long">
+        SELECT COUNT(*) FROM `order`
+    </select>
+
+    <!-- 根据关键字搜索订单列表及其关联的商品信息 -->
+    <select id="searchOrders" resultMap="OrderWithProductAndAddressResultMap">
+        SELECT
+            o.id AS order_id,
+            o.user_id,
+            o.product_id,
+            o.quantity,
+            o.total_price,
+            o.status,
+            o.address_id,
+            o.create_time AS order_create_time,
+            o.update_time AS order_update_time,
+            p.id AS product_id,
+            p.name AS product_name,
+            p.description AS product_description,
+            p.price AS product_price,
+            p.stock AS product_stock,
+            p.create_time AS product_create_time,
+            p.update_time AS product_update_time,
+            ua.id AS address_id,
+            ua.user_id AS address_user_id,
+            ua.receiver_name,
+            ua.receiver_phone,
+            ua.receiver_region,
+            ua.receiver_address,
+            ua.is_default,
+            ua.create_time AS address_create_time,
+            ua.update_time AS address_update_time
+        FROM
+            `order` o
+                LEFT JOIN
+            product p ON o.product_id = p.id
+                LEFT JOIN
+            user_address ua ON o.address_id = ua.id
+        WHERE
+            p.name LIKE CONCAT('%', #{keyword}, '%')
+           OR p.description LIKE CONCAT('%', #{keyword}, '%')
+    </select>
+
+
+    <insert id="insertOrder" parameterType="org.example.baken.entity.Order" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO `order` (user_id, product_id, quantity, total_price, status, address_id, create_time, update_time)
+        VALUES (#{userId}, #{productId}, #{quantity}, #{totalPrice}, #{status}, #{addressId}, #{createTime}, #{updateTime})
+    </insert>
+
+    <!-- 更新订单状态 -->
+    <update id="updateOrderStatus">
+        UPDATE `order`
+        SET status = #{status}, update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 查询所有订单及其关联的商品信息 -->
+    <!-- 查询所有订单及其关联的商品信息 -->
+    <select id="selectAllOrders" resultMap="OrderWithProductAndAddressResultMap">
+        SELECT
+            o.id AS order_id,
+            o.user_id,
+            o.product_id,
+            o.quantity,
+            o.total_price,
+            o.status,
+            o.address_id,
+            o.create_time AS order_create_time,
+            o.update_time AS order_update_time,
+            p.id AS product_id,
+            p.name AS product_name,
+            p.description AS product_description,
+            p.price AS product_price,
+            p.stock AS product_stock,
+            p.create_time AS product_create_time,
+            p.update_time AS product_update_time,
+            ua.id AS address_id,
+            ua.user_id AS address_user_id,
+            ua.receiver_name,
+            ua.receiver_phone,
+            ua.receiver_region,
+            ua.receiver_address,
+            ua.is_default,
+            ua.create_time AS address_create_time,
+            ua.update_time AS address_update_time
+        FROM
+            `order` o
+                LEFT JOIN
+            product p ON o.product_id = p.id
+                LEFT JOIN
+            user_address ua ON o.address_id = ua.id
+    </select>
+
+</mapper>

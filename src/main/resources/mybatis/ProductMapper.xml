@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.baken.mapper.ProductMapper">
+
+    <!-- ResultMap 定义 -->
+    <resultMap id="ProductResultMap" type="Product">
+        <id property="id" column="id" />
+        <result property="name" column="name" />
+        <result property="description" column="description" />
+        <result property="price" column="price" />
+        <result property="stock" column="stock" />
+        <result property="createTime" column="create_time" />
+        <result property="updateTime" column="update_time" />
+    </resultMap>
+
+    <!-- 根据ID查询商品 -->
+    <select id="selectProductById" resultMap="ProductResultMap">
+        SELECT id, name, description, price, stock, create_time, update_time
+        FROM product
+        WHERE id = #{id}
+    </select>
+
+    <!-- 查询所有商品 -->
+    <select id="selectAllProducts" resultMap="ProductResultMap">
+        SELECT id, name, description, price, stock, create_time, update_time
+        FROM product
+    </select>
+
+    <!-- 插入商品 -->
+    <insert id="insertProduct" parameterType="Product">
+        INSERT INTO product (name, description, price, stock, create_time, update_time)
+        VALUES (#{name}, #{description}, #{price}, #{stock}, #{createTime}, #{updateTime})
+    </insert>
+
+    <!-- 更新商品 -->
+    <update id="updateProduct" parameterType="Product">
+        UPDATE product
+        SET name = #{name},
+            description = #{description},
+            price = #{price},
+            stock = #{stock},
+            update_time = #{updateTime}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据ID删除商品 -->
+    <delete id="deleteProductById">
+        DELETE FROM product
+        WHERE id = #{id}
+    </delete>
+
+    <!-- 分页查询商品 -->
+    <select id="selectProductsByPage" resultMap="ProductResultMap">
+        SELECT id, name, description, price, stock, create_time, update_time
+        FROM product
+                 LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 查询商品总记录数 -->
+    <select id="countProducts" resultType="long">
+        SELECT COUNT(*)
+        FROM product
+    </select>
+
+    <!-- 根据名称搜索商品 -->
+    <select id="searchProducts" resultMap="ProductResultMap">
+        SELECT id, name, description, price, stock, create_time, update_time
+        FROM product
+        WHERE name LIKE CONCAT('%', #{name}, '%')
+            LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 统计搜索结果的记录数 -->
+    <select id="countSearchProducts" resultType="long">
+        SELECT COUNT(*)
+        FROM product
+        WHERE name LIKE CONCAT('%', #{name}, '%')
+    </select>
+
+    <!-- 删除与商品关联的秒杀活动记录 -->
+    <delete id="deleteSeckillActivitiesByProductId">
+        DELETE FROM seckill_activity
+        WHERE product_id = #{productId}
+    </delete>
+
+</mapper>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.baken.mapper.SeckillActivityMapper">
+
+    <!-- 定义resultMap -->
+    <resultMap id="SeckillActivityResultMap" type="org.example.baken.entity.SeckillActivity">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="productId" column="product_id"/>
+        <result property="startTime" column="start_time"/>
+        <result property="endTime" column="end_time"/>
+        <result property="stock" column="stock"/>
+        <result property="status" column="status"/>
+        <!-- 关联查询Product信息 -->
+        <association property="product" javaType="org.example.baken.entity.Product">
+            <id property="id" column="product_id"/>
+            <result property="name" column="product_name"/>
+            <result property="description" column="product_description"/>
+            <result property="price" column="product_price"/>
+            <result property="stock" column="product_stock"/>
+            <result property="createTime" column="product_create_time"/>
+            <result property="updateTime" column="product_update_time"/>
+        </association>
+    </resultMap>
+
+    <!-- 根据ID查询秒杀活动 -->
+    <select id="selectSeckillActivityById" resultMap="SeckillActivityResultMap">
+        SELECT sa.id, sa.name, sa.product_id, sa.start_time, sa.end_time, sa.stock, sa.status,
+               p.name AS product_name, p.description AS product_description, p.price AS product_price,
+               p.stock AS product_stock, p.create_time AS product_create_time, p.update_time AS product_update_time
+        FROM seckill_activity sa
+                 LEFT JOIN product p ON sa.product_id = p.id
+        WHERE sa.id = #{id}
+    </select>
+
+    <!-- 查询所有秒杀活动 -->
+    <select id="selectAllSeckillActivities" resultMap="SeckillActivityResultMap">
+        SELECT sa.id, sa.name, sa.product_id, sa.start_time, sa.end_time, sa.stock, sa.status,
+               p.name AS product_name, p.description AS product_description, p.price AS product_price,
+               p.stock AS product_stock, p.create_time AS product_create_time, p.update_time AS product_update_time
+        FROM seckill_activity sa
+                 LEFT JOIN product p ON sa.product_id = p.id
+    </select>
+
+    <!-- 分页查询秒杀活动 -->
+    <select id="selectSeckillActivitiesByPage" resultMap="SeckillActivityResultMap">
+        SELECT sa.id, sa.name, sa.product_id, sa.start_time, sa.end_time, sa.stock, sa.status,
+               p.name AS product_name, p.description AS product_description, p.price AS product_price,
+               p.stock AS product_stock, p.create_time AS product_create_time, p.update_time AS product_update_time
+        FROM seckill_activity sa
+                 LEFT JOIN product p ON sa.product_id = p.id
+            LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 分页查询当前正在进行的秒杀活动 -->
+    <select id="selectCurrentSeckillActivitiesByPage" resultMap="SeckillActivityResultMap">
+        SELECT sa.id, sa.name, sa.product_id, sa.start_time, sa.end_time, sa.stock, sa.status,
+               p.name AS product_name, p.description AS product_description, p.price AS product_price,
+               p.stock AS product_stock, p.create_time AS product_create_time, p.update_time AS product_update_time
+        FROM seckill_activity sa
+                 LEFT JOIN product p ON sa.product_id = p.id
+        WHERE sa.status = 1 -- 假设status=1表示活动正在进行
+          AND sa.end_time > NOW() -- 活动结束时间大于当前时间
+        ORDER BY sa.start_time ASC -- 根据开始时间升序排列
+            LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <!-- 查询秒杀活动总记录数 -->
+    <select id="countSeckillActivities" resultType="long">
+        SELECT COUNT(*)
+        FROM seckill_activity
+    </select>
+
+    <!-- 根据名称搜索秒杀活动 -->
+    <select id="searchSeckillActivities" resultMap="SeckillActivityResultMap">
+        SELECT sa.id, sa.name, sa.product_id, sa.start_time, sa.end_time, sa.stock, sa.status,
+               p.name AS product_name, p.description AS product_description, p.price AS product_price,
+               p.stock AS product_stock, p.create_time AS product_create_time, p.update_time AS product_update_time
+        FROM seckill_activity sa
+                 LEFT JOIN product p ON sa.product_id = p.id
+        WHERE sa.name LIKE CONCAT('%', #{name}, '%')
+    </select>
+
+    <!-- 插入秒杀活动 -->
+    <insert id="insertSeckillActivity">
+        INSERT INTO seckill_activity (name, product_id, start_time, end_time, stock, status)
+        VALUES (#{name}, #{productId}, #{startTime}, #{endTime}, #{stock}, #{status})
+    </insert>
+
+    <!-- 更新秒杀活动 -->
+    <update id="updateSeckillActivity">
+        UPDATE seckill_activity
+        SET name = #{name},
+            product_id = #{productId},
+            start_time = #{startTime},
+            end_time = #{endTime},
+            stock = #{stock},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 根据ID删除秒杀活动 -->
+    <delete id="deleteSeckillActivityById">
+        DELETE FROM seckill_activity
+        WHERE id = #{id}
+    </delete>
+
+    <select id="countCurrentSeckillActivities" resultType="long">
+        SELECT COUNT(*)
+        FROM seckill_activity
+        WHERE status = 1
+          AND end_time > NOW()
+    </select>
+
+</mapper>

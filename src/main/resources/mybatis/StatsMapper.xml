@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.example.baken.mapper.StatsMapper">
+
+    <!-- 查询秒杀活动统计数据 -->
+    <select id="getSeckillStats" resultType="org.example.baken.entity.SeckillStats">
+        SELECT
+            sa.id AS seckillActivityId,
+            sa.name AS seckillActivityName,
+            COUNT(DISTINCT so.user_id) AS participantCount,
+            COUNT(so.id) AS orderCount,
+            SUM(p.price) AS totalSales
+        FROM
+            seckill_activity sa
+                LEFT JOIN
+            seckill_order so ON sa.id = so.seckill_activity_id
+                LEFT JOIN
+            product p ON sa.product_id = p.id
+        GROUP BY
+            sa.id
+    </select>
+
+    <!-- 按时间范围查询秒杀活动统计数据 -->
+    <select id="getSeckillStatsByDateRange" resultType="org.example.baken.entity.SeckillStats">
+        SELECT
+            sa.id AS seckillActivityId,
+            sa.name AS seckillActivityName,
+            COUNT(DISTINCT so.user_id) AS participantCount,
+            COUNT(so.id) AS orderCount,
+            SUM(p.price) AS totalSales
+        FROM
+            seckill_activity sa
+                LEFT JOIN
+            seckill_order so ON sa.id = so.seckill_activity_id
+                LEFT JOIN
+            product p ON sa.product_id = p.id
+        WHERE
+            so.create_time BETWEEN #{startDate} AND #{endDate}
+        GROUP BY
+            sa.id
+    </select>
+
+</mapper>
